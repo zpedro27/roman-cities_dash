@@ -39,7 +39,9 @@ app.layout = html.Div(children=[
 
     dcc.Graph(id='map', figure={})
 
-])
+],
+    style={'backgroundColor': '#000000'} 
+)
 
 
 # ------------------------------------------------------------------------------
