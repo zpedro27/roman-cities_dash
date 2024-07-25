@@ -20,9 +20,9 @@ df = pd.read_excel("data/Hanson2016_CitiesDatabase_OxREP.xlsx", sheet_name="Citi
 # ------------------------------------------------------------------------------
 # App layout
 app.layout = html.Div(children=[ 
-    html.H1("Ancient roman world", style={'text-align': 'center', 'color': '#FA5835'}),
+    html.H1("Ancient roman world", style={"text-align": "center", "color": "#FA5835"}),
 
-    dcc.Slider(id='slider', 
+    dcc.Slider(id="slider", 
                min=df["Start Date"].min(), 
                max=df["Start Date"].max(), 
                step=25, value=-300,
@@ -34,13 +34,20 @@ app.layout = html.Div(children=[
     
     html.Br(),
 
-    html.Div(id='title', children=[], style={'text-align': 'center', 'color': '#FA5835'}),
+    html.Div(id="title", children=[], style={"text-align": "center", "color": "#FA5835"}),
+
     html.Br(),
 
-    dcc.Graph(id='map', figure={})
+    dcc.Graph(id="map", figure={}),
+
+    html.Br(),
+
+    html.Iframe(id="click-map", 
+                src="", 
+                style={"width": "100%", "height": "600px", "border": "none"}),
 
 ],
-    style={'backgroundColor': '#000000'} 
+    style={"backgroundColor": "#000000"} 
 )
 
 
@@ -73,14 +80,27 @@ def update_graph(value):
         zoom=3, 
         height=400,
         opacity=0.7,
-        template='plotly_dark',)
+        template="plotly_dark",)
 
     fig.update_layout(mapbox_style="carto-darkmatter")
-    fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+    fig.update_layout(margin={"r":0, "t":0, "l":0, "b":0})
 
     return container, fig
 
 
+@app.callback(
+    Output("click-map", "src"),
+    Input("map", "clickData")
+)
+def display_click_data(clickData):
+    if clickData is None:
+        return f"https://en.wikipedia.org/wiki/Ancient_Rome"
+    else:
+        clicked_point = clickData["points"][0]
+        city_name = clicked_point["hovertext"]
+        return f"https://en.wikipedia.org/wiki/{city_name}"
+
+
 # ------------------------------------------------------------------------------
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run_server(debug=True)
