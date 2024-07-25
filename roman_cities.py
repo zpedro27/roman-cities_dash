@@ -6,14 +6,13 @@ Created on Sat May 28 23:11:08 2022
 """
 
 import pandas as pd
-import plotly.express as px
 from dash import Dash, dcc, html, Input, Output
-
+from utils import helper
 
 
 app = Dash(__name__)
 
-# -- Import and clean data (importing xlsx into pandas)
+# Import data:
 df = pd.read_excel("data/Hanson2016_CitiesDatabase_OxREP.xlsx", sheet_name="Cities")
 
 
@@ -54,51 +53,40 @@ app.layout = html.Div(children=[
 # ------------------------------------------------------------------------------
 # Connect the Plotly graphs with Dash Components
 @app.callback(
-    [Output(component_id='title', component_property='children'),
-     Output(component_id='map', component_property='figure')],
-    [Input(component_id='slider', component_property='value'),]
+    [Output("title", "children"),
+     Output("click-map", "src"), 
+     Output("map", "figure")],
+    [Input("map", "clickData"),
+     Input("slider", "value")]
 )
-def update_graph(value):
+def update_graph_and_click(clickData, value):
 
-    if value < 0 :
-        display_year = str(abs(value)) + " BC"
-    else:
-        display_year = str(abs(value)) + " AD"
-    container = "Roman cities by {}".format(display_year)
+    # Text to be displayed above the map:
+    year = helper.convert_value_to_year(value)
+    container = f"Roman cities by {year}"
 
+    # Filter data:
     dff = df.copy()
     dff = dff.loc[dff["Start Date"] <= value]
 
-    # Plotly Express
-    fig = px.scatter_mapbox(
-        dff, 
-        lat="Latitude (Y)", 
-        lon="Longitude (X)", 
-        hover_name="Ancient Toponym", 
-        hover_data=["Modern Toponym", "Start Date"],
-        color_discrete_sequence=["#FA5835"], 
-        zoom=3, 
-        height=400,
-        opacity=0.7,
-        template="plotly_dark",)
+    # Map:
+    fig = helper.display_map(dff, coords_to_highlight=None)
 
-    fig.update_layout(mapbox_style="carto-darkmatter")
-    fig.update_layout(margin={"r":0, "t":0, "l":0, "b":0})
-
-    return container, fig
-
-
-@app.callback(
-    Output("click-map", "src"),
-    Input("map", "clickData")
-)
-def display_click_data(clickData):
-    if clickData is None:
-        return f"https://en.wikipedia.org/wiki/Ancient_Rome"
-    else:
+    # Highlight point:
+    if clickData is not None:
         clicked_point = clickData["points"][0]
         city_name = clicked_point["hovertext"]
-        return f"https://en.wikipedia.org/wiki/{city_name}"
+        lat = clicked_point["lat"]
+        lon = clicked_point["lon"]
+    
+        fig = helper.display_map(dff, coords_to_highlight=(lat, lon))
+        wiki_url = f"https://en.wikipedia.org/wiki/{city_name}"
+        return container, wiki_url, fig
+
+    fig = helper.display_map(dff, coords_to_highlight=None)
+    wiki_url = "https://en.wikipedia.org/wiki/Ancient_Rome"
+    return container, wiki_url, fig
+    
 
 
 # ------------------------------------------------------------------------------
