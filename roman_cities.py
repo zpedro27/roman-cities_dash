@@ -19,8 +19,8 @@ df = pd.read_excel("data/Hanson2016_CitiesDatabase_OxREP.xlsx", sheet_name="Citi
 
 # ------------------------------------------------------------------------------
 # App layout
-app.layout = html.Div(children=[   # style={'backgroundColor': '#111111'}
-    html.H1("Map of roman cities", style={'text-align': 'center', 'color': '#FA5835'}),
+app.layout = html.Div(children=[ 
+    html.H1("Ancient roman world", style={'text-align': 'center', 'color': '#FA5835'}),
 
     dcc.Slider(id='slider', 
                min=df["Start Date"].min(), 
@@ -55,7 +55,7 @@ def update_graph(value):
         display_year = str(abs(value)) + " BC"
     else:
         display_year = str(abs(value)) + " AD"
-    container = "Roman cities until {}".format(display_year)
+    container = "Roman cities by {}".format(display_year)
 
     dff = df.copy()
     dff = dff.loc[dff["Start Date"] <= value]
