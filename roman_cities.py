@@ -28,8 +28,9 @@ app.layout = html.Div(children=[
                marks={-900: "900 BC",
                       -500: "500 BC",
                       1: "1 AD",
-                      200: "200 AD"},
-               tooltip={"placement": "bottom", "always_visible": True}),
+                      200: "200 AD",},
+               tooltip={"placement": "bottom", "always_visible": True,
+                        "style": {"color": "#FA5835"}}),
     
     html.Br(),
 
